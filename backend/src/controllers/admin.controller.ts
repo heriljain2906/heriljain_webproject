@@ -12,7 +12,7 @@ export const updateComplaintPriority = async (req: AuthRequest, res: Response): 
     }
 
     const complaint = await prisma.complaint.update({
-      where: { id },
+      where: { id: id as string },
       data: { priority }
     });
     
@@ -33,7 +33,7 @@ export const updateComplaintStatus = async (req: AuthRequest, res: Response): Pr
     }
 
     const complaint = await prisma.complaint.update({
-      where: { id },
+      where: { id: id as string },
       data: { status }
     });
     
