@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../dev.db"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  email     String?  @unique
+  fullname  String
+  role      String   @default("CITIZEN") // SQLite enum workaround
+  password  String?  // nullable if OTP is primary
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  complaints Complaint[]
+  feedbacks  Feedback[]
+}
+
+model Department {
+  id   String @id @default(uuid())
+  name String @unique
+  
+  complaints Complaint[]
+}
+
+model Category {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String?
+  
+  complaints Complaint[]
+}
+
+model Complaint {
+  id             String    @id @default(uuid())
+  title          String
+  description    String
+  status         String    @default("PENDING") // enum workaround
+  priority       String    @default("MEDIUM")  // enum workaround
+  
+  latitude       Float?
+  longitude      Float?
+  aiClassification String?
+  aiConfidence   Float?
+  duplicateOfId  String?
+  
+  citizenId      String
+  citizen        User      @relation(fields: [citizenId], references: [id])
+  
+  departmentId   String?
+  department     Department? @relation(fields: [departmentId], references: [id])
+  
+  categoryId     String?
+  category       Category?   @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  media     Media[]
+}
+
+model Media {
+  id          String   @id @default(uuid())
+  type        String   // IMAGE, VIDEO, AUDIO
+  url         String
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id])
+  
+  analysisResult String? // For CV results (potholes, garbage)
+}
+
+model Feedback {
+  id          String   @id @default(uuid())
+  rating      Int
+  comments    String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
